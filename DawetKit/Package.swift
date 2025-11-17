@@ -1,6 +1,6 @@
 // swift-tools-version: 5.9
 //
-//  PortableExecutable.swift
+//  Package.swift
 //  DawetKit
 //
 //  This file is part of Dawet.
@@ -31,7 +31,7 @@ let package = Package(
         )
     ],
     dependencies: [
-      .package(url: "git@github.com:SwiftPackageIndex/SemanticVersion.git", from: "0.3.0")
+        .package(url: "git@github.com:SwiftPackageIndex/SemanticVersion.git", from: "0.3.0")
     ],
     targets: [
         .target(

@@ -31,6 +31,8 @@ struct BottleView: View {
     @State private var path = NavigationPath()
     @State private var programLoading: Bool = false
     @State private var showWinetricksSheet: Bool = false
+    @State private var isInstallingProgram: Bool = false
+    @State private var installStatusMessage: String?
 
     private let gridLayout = [GridItem(.adaptive(minimum: 100, maximum: .infinity))]
 
@@ -63,6 +65,12 @@ struct BottleView: View {
             .bottomBar {
                 HStack {
                     Spacer()
+                    Menu {
+                        Button("Install Steam", action: installSteam)
+                    } label: {
+                        Label("Install Program", systemImage: "square.and.arrow.down")
+                    }
+                    .disabled(isInstallingProgram)
                     Button("button.cDrive") {
                         bottle.openCDrive()
                     }
@@ -111,8 +119,21 @@ struct BottleView: View {
                         ProgressView()
                             .controlSize(.small)
                     }
+                    if isInstallingProgram {
+                        Spacer()
+                            .frame(width: 10)
+                        ProgressView()
+                            .controlSize(.small)
+                    }
                 }
                 .padding()
+                if let installStatusMessage = installStatusMessage {
+                    Text(installStatusMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                        .padding(.bottom)
+                }
             }
             .onAppear {
                 updateStartMenu()
@@ -159,6 +180,57 @@ struct BottleView: View {
                     name: program.url.deletingPathExtension().lastPathComponent,
                     url: program.url
                 ))
+            }
+        }
+    }
+
+    private func installSteam() {
+        guard !isInstallingProgram,
+              let steamURL = URL(string: "https://cdn.cloudflare.steamstatic.com/client/installer/SteamSetup.exe")
+        else { return }
+
+        isInstallingProgram = true
+        installStatusMessage = "Downloading Steam…"
+
+        Task(priority: .userInitiated) {
+            do {
+                let (tempURL, _) = try await URLSession.shared.download(from: steamURL)
+
+                let installersFolder = bottle.url.appending(path: "Installers")
+                try FileManager.default.createDirectory(at: installersFolder, withIntermediateDirectories: true)
+                let destinationURL = installersFolder.appending(path: "SteamSetup.exe")
+                if FileManager.default.fileExists(atPath: destinationURL.path) {
+                    try FileManager.default.removeItem(at: destinationURL)
+                }
+                try FileManager.default.moveItem(at: tempURL, to: destinationURL)
+
+                await MainActor.run {
+                    installStatusMessage = "Launching Steam installer…"
+                }
+
+                Task.detached { [weak bottle] in
+                    guard let bottle else { return }
+                    do {
+                        try await Wine.runProgram(at: destinationURL, bottle: bottle)
+                        await MainActor.run {
+                            installStatusMessage = "Steam installer launched. Complete the setup inside Wine."
+                            updateStartMenu()
+                        }
+                    } catch {
+                        await MainActor.run {
+                            installStatusMessage = "Failed to launch Steam installer: \(error.localizedDescription)"
+                        }
+                    }
+                }
+
+                await MainActor.run {
+                    isInstallingProgram = false
+                }
+            } catch {
+                await MainActor.run {
+                    installStatusMessage = "Failed to install Steam: \(error.localizedDescription)"
+                    isInstallingProgram = false
+                }
             }
         }
     }

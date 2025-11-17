@@ -49,6 +49,13 @@
             ReferencedContainer = "container:Dawet.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "DAWET_SOURCE_ROOT"
+            value = "/Volumes/app/research-windows-based/dawet"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

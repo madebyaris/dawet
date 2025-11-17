@@ -262,7 +262,6 @@ public class Wine {
 enum WineInterfaceError: Error {
     case invalidResponce
 }
-
 enum RegistryType: String {
     case binary = "REG_BINARY"
     case dword = "REG_DWORD"
@@ -382,21 +381,20 @@ extension Wine {
 
     @discardableResult
     public static func control(bottle: Bottle) async throws -> String {
-        return try await Wine.runWine(["control"], bottle: bottle)
+        try await Wine.runWine(["control"], bottle: bottle)
     }
 
     @discardableResult
     public static func regedit(bottle: Bottle) async throws -> String {
-        return try await Wine.runWine(["regedit"], bottle: bottle)
+        try await Wine.runWine(["regedit"], bottle: bottle)
     }
 
     @discardableResult
     public static func cfg(bottle: Bottle) async throws -> String {
-        return try await Wine.runWine(["winecfg"], bottle: bottle)
+        try await Wine.runWine(["winecfg"], bottle: bottle)
     }
-
     @discardableResult
     public static func changeWinVersion(bottle: Bottle, win: WinVersion) async throws -> String {
-        return try await Wine.runWine(["winecfg", "-v", win.rawValue], bottle: bottle)
+        try await Wine.runWine(["winecfg", "-v", win.rawValue], bottle: bottle)
     }
 }

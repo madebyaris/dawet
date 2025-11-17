@@ -78,7 +78,8 @@
 #endif
 
 // MinGW headers are broken. Who'dve guessed?
-#ifndef _MSC_VER
+// Note: Newer mingw-w64 (13.0+) already defines this, so skip to avoid redefinition
+#if !defined(_MSC_VER) && !defined(__MINGW64_VERSION_MAJOR)
 typedef struct _D3DDEVINFO_RESOURCEMANAGER
 {
   char dummy;

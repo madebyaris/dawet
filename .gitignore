@@ -108,6 +108,7 @@ Libraries/*/wineg++
 Libraries/*/winecpp
 Libraries/*/wrc
 Libraries/*/widl
+Libraries/*/install/
 Libraries/*/.deps/
 Libraries/*/.libs/
 Libraries/*/config.log

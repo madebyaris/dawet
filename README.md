@@ -1,81 +1,66 @@
 <div align="center">
 
-  # Dawet 🥃 
-  *Wine but a bit stronger*
-  
-  ![](https://img.shields.io/github/actions/workflow/status/IsaacMarovitz/Whisky/SwiftLint.yml?style=for-the-badge)
-  [![](https://img.shields.io/discord/1115955071549702235?style=for-the-badge)](https://discord.gg/CsqAfs9CnM)
+# Dawet 🍹  
+**WhiskyWine roots • CrossOver strength • Cendol spirit**
+
+[![SwiftLint](https://img.shields.io/github/actions/workflow/status/madebyaris/dawet/SwiftLint.yml?style=for-the-badge)](https://github.com/madebyaris/dawet/actions)
+[![Discord](https://img.shields.io/discord/1115955071549702235?style=for-the-badge)](https://discord.gg/CsqAfs9CnM)
+
 </div>
 
-## Maintenance Notice
+## Welcome to Dawet
 
-[Dawet is no longer actively maintained](https://docs.getwhisky.app/maintenance-notice). Apps and games may break at any time.
+This repo is the spiritual successor to WhiskyWine—rebuilt and maintained by [madebyaris.com](https://madebyaris.com) / [github.com/madebyaris](https://github.com/madebyaris).  
+We still stand on the shoulders of CrossOver and the pioneering Whisky community, but Dawet is evolving into something more robust, more modern, and laser‑focused on day‑to‑day macOS users.  
+Internally we call this effort **Project Cendol**: keep the drink sweet, refreshing, and reliable for everyone.
 
-<img width="650" alt="Config" src="https://github.com/Whisky-App/Whisky/assets/42140194/d0a405e8-76ee-48f0-92b5-165d184a576b">
+## What you get
 
-Familiar UI that integrates seamlessly with macOS
+- **CrossOver-grade compatibility** – Dawet embeds CrossOver 22.1.1 patches plus Apple’s Game Porting Toolkit, so DirectX 11/12 titles get serious love.
+- **WhiskyWine heritage** – The SwiftUI bottle manager you already know, refined and rebranded.
+- **Local build friendly** – `Scripts/build-all.sh` compiles Wine 10.0, DXVK 1.10.3, MoltenVK, cabextract, etc. Drop your custom artefacts in `Libraries/` and Dawet will pick them up via `DAWET_SOURCE_ROOT`.
+- **End-user comfort** – One-click Steam installation, pinning programs, Winetricks integration, and automatic detection of your local Wine build so you’re not stuck downloading “WhiskyWine” ever again.
+- **Cendol roadmap** – A constantly updated checklist of UX upgrades (automatic health checks, curated presets, better crash reporting) built from real-world feedback.
 
-<div align="right">
-  <img width="650" alt="New Bottle" src="https://github.com/Whisky-App/Whisky/assets/42140194/ed1a0d69-d8fb-442b-9330-6816ba8981ba">
+## System requirements
 
-  One-click bottle creation and management
-</div>
+- Apple Silicon Mac (M1, M2, M3…)
+- macOS 14.0 (Sonoma) or newer
+- ~40 GB free disk space for source builds (less if you use prebuilt artefacts)
 
-<img width="650" alt="debug" src="https://user-images.githubusercontent.com/42140194/229176642-57b80801-d29b-4123-b1c2-f3b31408ffc6.png">
+## Installation
 
-Debug and profile with ease
+| Method | Command |
+| ------ | ------- |
+| Homebrew | `brew install --cask dawet` |
+| Manual build | `./Scripts/build-all.sh && open Dawet.xcodeproj` |
 
----
+When running from Xcode, set an environment variable `DAWET_SOURCE_ROOT=/path/to/dawet` so the app uses the local libraries you compiled.
 
-Dawet provides a clean and easy to use graphical wrapper for Wine built in native SwiftUI. You can make and manage bottles, install and run Windows apps and games, and unlock the full potential of your Mac with no technical knowledge required. Dawet is built on top of CrossOver 22.1.1, and Apple's own `Game Porting Toolkit`.
+## Usage snapshot
 
-Translated on [Crowdin](https://crowdin.com/project/whisky).
+```bash
+# clone and build everything (Wine, DXVK, MoltenVK…)
+git clone https://github.com/madebyaris/dawet.git
+cd dawet
+./Scripts/build-all.sh
 
----
+# launch in Xcode
+open Dawet.xcodeproj
+```
 
-## System Requirements
-- CPU: Apple Silicon (M-series chips)
-- OS: macOS Sonoma 14.0 or later
+Create a bottle, click **Install Program → Install Steam**, and Dawet will download the latest Steam installer, run it through Wine, and surface the app in “Installed Programs” automatically.  
+If Steam throws the classic `0x3008` error: add `-no-cef-sandbox -tcp` to Steam’s arguments or run `winetricks corefonts`.
 
-## Homebrew
+## Support the maker
 
-Dawet is on homebrew! Install with 
-`brew install --cask dawet`.
+Dawet is crafted with ❤️ by [madebyaris.com](https://madebyaris.com). If this project saves you time or helps you ship games, please consider [sponsoring on GitHub](https://github.com/sponsors/madebyaris). Sponsors keep the Cendol roadmap moving, pay for test hardware, and let me spend more time fixing the hairy Wine bugs nobody else wants to touch.
 
-## My game isn't working!
+## Credits & thanks
 
-Some games need special steps to get working. Check out the [wiki](https://github.com/IsaacMarovitz/Whisky/wiki/Game-Support).
+- Whisky / WhiskyWine team – for the original UI and community spark.
+- [CodeWeavers & CrossOver](https://www.codeweavers.com/crossover) – upstream patches and decades of Wine expertise.
+- [DXVK](https://github.com/doitsujin/dxvk), [MoltenVK](https://github.com/KhronosGroup/MoltenVK), [msync](https://github.com/marzent/wine-msync), Sparkle, SemanticVersion, Swift Argument Parser, SwiftTextTable, and the macOS gaming scene at large.
+- Apple’s D3DMetal / Game Porting Toolkit for the Metal backend goodness.
 
----
-
-## Credits & Acknowledgments
-
-Dawet is possible thanks to the magic of several projects:
-
-- [msync](https://github.com/marzent/wine-msync) by marzent
-- [DXVK-macOS](https://github.com/Gcenx/DXVK-macOS) by Gcenx and doitsujin
-- [MoltenVK](https://github.com/KhronosGroup/MoltenVK) by KhronosGroup
-- [Sparkle](https://github.com/sparkle-project/Sparkle) by sparkle-project
-- [SemanticVersion](https://github.com/SwiftPackageIndex/SemanticVersion) by SwiftPackageIndex
-- [swift-argument-parser](https://github.com/apple/swift-argument-parser) by Apple
-- [SwiftTextTable](https://github.com/scottrhoyt/SwiftyTextTable) by scottrhoyt
-- [CrossOver 22.1.1](https://www.codeweavers.com/crossover) by CodeWeavers and WineHQ
-- D3DMetal by Apple
-
-Special thanks to Gcenx, ohaiibuzzle, and Nat Brown for their support and contributions!
-
----
-
-<table>
-  <tr>
-    <td>
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="./images/cw-dark.png">
-          <img src="./images/cw-light.png" width="500">
-        </picture>
-    </td>
-    <td>
-        Dawet doesn't exist without CrossOver. Support the work of CodeWeavers using our <a href="https://www.codeweavers.com/store?ad=1010">affiliate link</a>.
-    </td>
-  </tr>
-</table>
+And of course, everyone filing issues, sending PRs, and showing up in Discord. Dawet is a community drink—cendol in spirit, robust in delivery. Cheers! 🥂

@@ -83,6 +83,28 @@ struct WelcomeView: View {
                         }
 
                         if !dawetWineInstalled {
+                            // Check if local build exists and install it automatically
+                            if DawetWineInstaller.hasLocalBuild {
+                                Task {
+                                    do {
+                                        try DawetWineInstaller.installLocalBuild()
+                                        await MainActor.run {
+                                            checkInstallStatus()
+                                            if dawetWineInstalled == true {
+                                                showSetup = false
+                                                return
+                                            }
+                                            path.append(.dawetWineDownload)
+                                        }
+                                    } catch {
+                                        print("Failed to install local build: \(error)")
+                                        await MainActor.run {
+                                            path.append(.dawetWineDownload)
+                                        }
+                                    }
+                                }
+                                return
+                            }
                             path.append(.dawetWineDownload)
                             return
                         }
