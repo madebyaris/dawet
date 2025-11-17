@@ -1,0 +1,4 @@
+#define WINDEBUG_MAJOR 10
+#define WINDEBUG_MINOR 0
+#define WINDEBUG_BUILD 0
+#define WINDEBUG_STR "10.0"

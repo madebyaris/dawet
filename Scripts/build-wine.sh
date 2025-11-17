@@ -62,8 +62,27 @@ if ! command -v aarch64-w64-mingw32-clang &> /dev/null; then
     exit 1
 fi
 
+# Create distversion.h (required by winedbg)
+# This file is referenced by programs/winedbg/resource.h
+if [ ! -f "$WINE_SRC/include/distversion.h" ]; then
+    echo -e "${YELLOW}Creating distversion.h...${NC}"
+    mkdir -p "$WINE_SRC/include"
+    WINE_VERSION=$(cat "$WINE_SRC/VERSION" | grep -o '[0-9]\+\.[0-9]\+' | head -1)
+    WINE_MAJOR=$(echo "$WINE_VERSION" | cut -d. -f1)
+    WINE_MINOR=$(echo "$WINE_VERSION" | cut -d. -f2)
+    cat > "$WINE_SRC/include/distversion.h" << EOF
+#define WINDEBUG_MAJOR $WINE_MAJOR
+#define WINDEBUG_MINOR $WINE_MINOR
+#define WINDEBUG_BUILD 0
+#define WINDEBUG_STR "$WINE_VERSION"
+EOF
+    # Also copy to programs/winedbg where resource.h includes it
+    cp "$WINE_SRC/include/distversion.h" "$WINE_SRC/programs/winedbg/distversion.h"
+fi
+
 # Create build directory
 mkdir -p "$BUILD_DIR"
+
 cd "$BUILD_DIR"
 
 # Configure Wine for macOS ARM64
@@ -76,7 +95,8 @@ echo -e "${YELLOW}Configuring Wine...${NC}"
     --without-alsa \
     --without-pulse \
     --with-freetype \
-    --with-x \
+    --without-x \
+    --without-wayland \
     --without-gphoto \
     --without-capi \
     --without-gettext \
