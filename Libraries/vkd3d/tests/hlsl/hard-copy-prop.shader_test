@@ -1,0 +1,76 @@
+[pixel shader todo(sm<4)]
+float cond;
+
+float4 main() : sv_target
+{
+    float4 a = {1, 2, 3, 4};
+    float4 b;
+
+    // invalidate a
+    if (cond)
+        a = float4(-1, -2, -3, -4);
+
+    b = a;
+    a.y = 357;
+    return b.y;
+}
+
+[test]
+uniform 0 float 0.0
+todo(sm<4) draw quad
+probe (0, 0) rgba (2.0, 2.0, 2.0, 2.0)
+uniform 0 float 1.0
+todo(sm<4) draw quad
+probe (0, 0) rgba (-2.0, -2.0, -2.0, -2.0)
+
+
+[pixel shader todo(sm<4)]
+float cond;
+
+float4 main() : sv_target
+{
+    float2 r = {1, 2};
+    float2 tmp;
+
+    // invalidate r
+    if (cond)
+        r = float2(10, 20);
+
+    tmp = r;
+    r = tmp;
+    return r.y;
+}
+
+[test]
+uniform 0 float 0.0
+todo(sm<4) draw quad
+probe (0, 0) rgba (2.0, 2.0, 2.0, 2.0)
+uniform 0 float 1.0
+todo(sm<4) draw quad
+probe (0, 0) rgba (20.0, 20.0, 20.0, 20.0)
+
+
+[pixel shader todo(sm<4)]
+float cond;
+
+float4 main() : sv_target
+{
+    float2 r = {3, 4};
+
+    // invalidate r
+    if (cond)
+        r = float2(30, 40);
+
+    r = r;
+    r = float2(1, r.y);
+
+    return float4(r, 0, 0);
+}
+
+[test]
+uniform 0 float 0.0
+todo(sm<4) draw quad
+probe (0, 0) rgba (1.0, 4.0, 0.0, 0.0)
+uniform 0 float 1.0
+todo(sm<4) draw quad
+probe (0, 0) rgba (1.0, 40.0, 0.0, 0.0)

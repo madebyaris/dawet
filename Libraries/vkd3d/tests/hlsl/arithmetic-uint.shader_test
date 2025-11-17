@@ -1,0 +1,70 @@
+[require]
+shader model >= 4.0
+
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    uint x = 5;
+    uint y = 15;
+
+    return float4(x + y, x - y, x * y, x / y);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (20.0, 4294967296.0, 75.0, 0.0)
+
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    uint x = 5;
+    uint y = 15;
+
+    return float4(x % y, +x, -x, y / x);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (5.0, 5.0, 4294967296.0, 3.0)
+
+[pixel shader fail(sm<6)]
+float4 main() : SV_TARGET
+{
+    uint x = 1;
+    uint y = 0;
+
+    return x / y;
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (0.0, 0.0, 0.0, 0.0)
+
+[pixel shader fail(sm<6)]
+float4 main() : SV_TARGET
+{
+    uint x = 1;
+    uint y = 0;
+
+    return x % y;
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (0.0, 0.0, 0.0, 0.0)
+
+
+% Test expression normalization and simplification.
+
+[pixel shader]
+uniform uint4 x;
+
+float4 main() : SV_TARGET
+{
+    return 6 + (2 * x * 3) - 5;
+}
+
+[test]
+uniform 0 uint4 0 1 2 3
+todo(msl) draw quad
+probe (0, 0) rgba (1.0, 7.0, 13.0, 19.0)

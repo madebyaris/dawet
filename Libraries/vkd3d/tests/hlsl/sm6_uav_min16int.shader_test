@@ -1,0 +1,34 @@
+[require]
+shader model >= 5.0
+
+[uav 1]
+format r32-sint
+size(2d, 2, 1)
+
+32768 0
+
+[uav 2]
+format r32-uint
+size(2d, 2, 1)
+
+65536 0
+
+[pixel shader]
+RWTexture2D<min16int> u : register(u1);
+RWTexture2D<min16uint> v : register(u2);
+
+float4 main() : sv_target
+{
+    uint2 a = uint2(0, 0);
+    uint2 b = uint2(1, 0);
+    u[b] = u[a];
+    v[b] = v[a];
+    return 0;
+}
+
+[test]
+draw quad
+probe uav 1 (0, 0) rui (32768)
+probe uav 1 (1, 0) rui (32768)
+probe uav 2 (0, 0) rui (65536)
+probe uav 2 (1, 0) rui (65536)

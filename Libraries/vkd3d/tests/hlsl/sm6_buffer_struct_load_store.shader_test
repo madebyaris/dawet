@@ -1,0 +1,68 @@
+[require]
+shader model >= 6.0
+
+[uav 0]
+format r32g32b32a32-float
+size(buffer, 24)
+
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+[pixel shader]
+uniform int4 i;
+
+struct foo
+{
+	float a;
+	float b;
+};
+
+RWStructuredBuffer<foo> u;
+
+float4 main() : sv_target
+{
+    u[i.x].b = 0.625;
+    u[i.x + 1].a = 0.75;
+    u[i.x + 2].b = -1.25;
+    float2 f = float2(u[i.y].b, u[i.y + 1].a);
+    return float4(f, u[i.y + 2].b, 0);
+}
+
+[test]
+uniform 0 int4 0 0 0 0
+draw quad
+probe (0, 0) rgba (0.625, 0.75, -1.25, 0)
+
+[uav 0]
+format r32g32b32a32-float
+size(buffer, 24)
+
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+[pixel shader]
+uniform int4 i;
+
+struct foo
+{
+	float a;
+	double b;
+};
+
+RWStructuredBuffer<foo> u;
+
+float4 main() : sv_target
+{
+    u[i.x].b = 0.625;
+    u[i.x + 1].a = 0.75;
+    u[i.x + 2].b = -1.25;
+    float2 f = float2(u[i.y].b, u[i.y + 1].a);
+    return float4(0.5, u[i.y + 2].b, f);
+}
+
+[test]
+uniform 0 int4 0 0 0 0
+draw quad
+probe (0, 0) rgba (0.5, -1.25, 0.625, 0.75)

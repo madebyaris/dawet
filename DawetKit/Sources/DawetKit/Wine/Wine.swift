@@ -22,10 +22,14 @@ import os.log
 public class Wine {
     /// URL to the installed `DXVK` folder
     private static let dxvkFolder: URL = DawetWineInstaller.libraryFolder.appending(path: "DXVK")
-    /// Path to the `wine64` binary
-    public static let wineBinary: URL = DawetWineInstaller.binFolder.appending(path: "wine64")
-    /// Parth to the `wineserver` binary
-    private static let wineserverBinary: URL = DawetWineInstaller.binFolder.appending(path: "wineserver")
+    /// Path to the `wine64` binary (uses local build if available)
+    public static var wineBinary: URL {
+        return DawetWineInstaller.effectiveBinFolder.appending(path: "wine64")
+    }
+    /// Path to the `wineserver` binary (uses local build if available)
+    private static var wineserverBinary: URL {
+        return DawetWineInstaller.effectiveBinFolder.appending(path: "wineserver")
+    }
 
     /// Run a process on a executable file given by the `executableURL`
     private static func runProcess(
@@ -125,7 +129,7 @@ public class Wine {
 
     public static func generateTerminalEnvironmentCommand(bottle: Bottle) -> String {
         var cmd = """
-        export PATH=\"\(DawetWineInstaller.binFolder.path):$PATH\"
+        export PATH=\"\(DawetWineInstaller.effectiveBinFolder.path):$PATH\"
         export WINE=\"wine64\"
         alias wine=\"wine64\"
         alias winecfg=\"wine64 winecfg\"

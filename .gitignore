@@ -90,3 +90,34 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+# CrossOver Libraries Build Artifacts
+Libraries/*/build/
+Libraries/*/build-*/
+Libraries/*/*.o
+Libraries/*/*.a
+Libraries/*/*.so
+Libraries/*/*.dylib
+Libraries/*/*.dll
+Libraries/*/wine64
+Libraries/*/wineserver
+Libraries/*/wine
+Libraries/*/winebuild
+Libraries/*/winegcc
+Libraries/*/wineg++
+Libraries/*/winecpp
+Libraries/*/wrc
+Libraries/*/widl
+Libraries/*/.deps/
+Libraries/*/.libs/
+Libraries/*/config.log
+Libraries/*/config.status
+Libraries/*/Makefile
+Libraries/*/libtool
+Libraries/*/stamp-h1
+Libraries/wine/tools/wineapploader
+Libraries/wine/programs/*/wine*.app/
+Libraries/dxvk/build.*/
+Libraries/moltenvk/Package/
+Libraries/moltenvk/MoltenVK.xcframework/
+Libraries/moltenvk/MoltenVKShaderConverter.xcframework/

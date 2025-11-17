@@ -1,0 +1,50 @@
+[require]
+shader model >= 4.0
+
+[pixel shader]
+uniform int4 u;
+float4 main() : sv_target
+{
+    float4 result;
+    min16float f0 = min16float(u.x & 0xffff);
+    min16float f1 = min16float(u.y & 0xffff);
+    min16int i = -f0;
+    min16int j = f1;
+    int k = u.z;
+
+    result.x = -i + j + k;
+    result.y = k;
+
+    result.z = 0;
+    result.w = 0;
+    return result;
+}
+
+[test]
+uniform 0 int4 32764 4 4 0
+draw quad
+probe (0, 0) rgba (32772.0, 4.0, 0.0, 0.0)
+
+[pixel shader]
+uniform uint4 u;
+float4 main() : sv_target
+{
+    float4 result;
+    min16float f0 = min16float(u.x & 0xffff);
+    min16float f1 = min16float(u.y & 0xffff);
+    min16uint i = abs(f0);
+    min16uint j = f1;
+    uint k = u.z;
+
+    result.x = (i << 1) + j + k;
+    result.y = k;
+
+    result.z = 0;
+    result.w = 0;
+    return result;
+}
+
+[test]
+uniform 0 uint4 32764 4 4 0
+draw quad
+probe (0, 0) rgba (65536.0, 4.0, 0.0, 0.0)

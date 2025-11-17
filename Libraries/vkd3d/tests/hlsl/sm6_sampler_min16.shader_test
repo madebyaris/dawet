@@ -1,0 +1,24 @@
+[require]
+shader model >= 4.0
+
+[sampler 0]
+filter linear linear linear
+address clamp clamp clamp
+
+[srv 0]
+size(2d, 2, 2)
+0.0 0.0 0.0 0.0     0.0 0.0 0.0 0.0
+0.0 0.0 0.0 0.0     1.0 0.0 1.0 0.0
+
+[pixel shader]
+sampler s;
+Texture2D<min16float4> t;
+
+float4 main() : sv_target
+{
+    return t.Sample(s, float2(0.5, 0.5));
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (0.25, 0, 0.25, 0)

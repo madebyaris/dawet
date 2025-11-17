@@ -1,0 +1,227 @@
+[require]
+shader model >= 5.0
+
+% UAVs are implicitly allocated starting from the highest render target slot.
+% They cannot overlap render target slots, and also cannot be allocated any
+% lower than the highest render target.
+% This ceases to be true with shader model 5.1.
+
+[rtv 1]
+format r32g32b32a32-float
+size (2d, 640, 480)
+
+[pixel shader]
+struct s
+{
+    float3 a;
+};
+
+RWBuffer<float4> u : register(u2);
+RWBuffer<float> u1;
+RWBuffer<float2x2> u2;
+RWBuffer<struct s> u3;
+
+float4 main() : sv_target1
+{
+    u[0] = float4(11.1, 12.2, 13.3, 14.4);
+    return 0;
+}
+
+[pixel shader]
+struct s
+{
+    float3 a;
+};
+
+RasterizerOrderedBuffer<float4> u : register(u2);
+RasterizerOrderedBuffer<float> u1;
+RasterizerOrderedBuffer<float2x2> u2;
+RasterizerOrderedBuffer<struct s> u3;
+
+float4 main() : sv_target1
+{
+    u[0] = float4(11.1, 12.2, 13.3, 14.4);
+    return 0;
+}
+
+% Type size is too wide
+[pixel shader fail]
+struct s
+{
+    float3 a;
+    float2 b;
+};
+RWBuffer<struct s> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+[pixel shader fail(sm<6) todo]
+RWBuffer<double3> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+[pixel shader]
+RWBuffer<double2> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+[pixel shader fail]
+struct s
+{
+    float3 a;
+    float2 b;
+};
+RasterizerOrderedBuffer<struct s> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+[pixel shader fail(sm<6) todo]
+RasterizerOrderedBuffer<double3> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+[pixel shader]
+RasterizerOrderedBuffer<double2> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+% Array type
+[pixel shader fail(sm<6)]
+typedef float arr[2];
+RWBuffer<arr> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+% Object types
+[pixel shader fail(sm<6)]
+RWBuffer<Texture2D> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+[pixel shader fail]
+struct s
+{
+    Texture2D t;
+};
+RWBuffer<struct s> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+[pixel shader fail(sm<6)]
+typedef float arr[2];
+RasterizerOrderedBuffer<arr> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+% Object types
+[pixel shader fail(sm<6)]
+RasterizerOrderedBuffer<Texture2D> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+[pixel shader fail]
+struct s
+{
+    Texture2D t;
+};
+RasterizerOrderedBuffer<struct s> u;
+
+float4 main() : sv_target1
+{
+    return 0;
+}
+
+
+[require]
+shader model >= 5.0
+
+[uav 1]
+format r32g32b32a32-sint
+size (buffer, 2)
+1 2 3 4 5 6 7 8
+
+[pixel shader]
+RWBuffer<int4> u : register(u1);
+
+float4 main() : sv_target
+{
+    u[0] = int4(11, -12, 13, -14);
+    u[1] = int4(-15, 16, -17, 18);
+    return 0;
+}
+
+[test]
+todo(msl) draw quad
+probe uav 1 (0) rgbai (11, -12, 13, -14)
+probe uav 1 (1) rgbai (-15, 16, -17, 18)
+
+[uav 2]
+format r32g32b32a32-float
+size (buffer, 1)
+0.1 0.2 0.3 0.4
+
+[pixel shader]
+RWBuffer<float4> u : register(u2);
+
+float4 main() : sv_target1
+{
+    u[0] = float4(11.1, 12.2, 13.3, 14.4);
+    return 0;
+}
+
+[test]
+todo(msl) draw quad
+probe uav 2 (0) rgba (11.1, 12.2, 13.3, 14.4)
+
+
+[uav 2]
+stride 16
+size (buffer, 1)
+
+0.1 0.2 0.3 0.4
+
+[pixel shader todo]
+RWStructuredBuffer<int4> u : register(u2);
+
+float4 main() : sv_target1
+{
+    u[0] = int4(0x41300000, 0xc1400000, 0x41500000, 0xc1600000);
+    return 0;
+}
+
+[test]
+todo(sm<6) draw quad
+probe uav 2 (0) rgba (11, -12, 13, -14)

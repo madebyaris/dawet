@@ -1,0 +1,92 @@
+% Test implicit and explicit casts on function output parameters.
+
+[pixel shader todo]
+
+uniform float4 f;
+
+void func(out float4 o)
+{
+    o = f;
+}
+
+float4 main() : sv_target
+{
+    int4 x;
+    func(x);
+    return x;
+}
+
+[test]
+uniform 0 float4 -1.9 -1.0 2.9 4.0
+todo(sm<6) draw quad
+probe (0, 0) rgba (-1.0, -1.0, 2.0, 4.0)
+
+% As above, but cast "x" to float4 first.
+% In SM 6 a cast seems to implicitly promote the type to const,
+% so it fails to match the parameter of func().
+
+[pixel shader todo fail(sm>=6)]
+
+uniform float4 f;
+
+void func(out float4 o)
+{
+    o = f;
+}
+
+float4 main() : sv_target
+{
+    int4 x;
+    func((float4)x);
+    return x;
+}
+
+[test]
+uniform 0 float4 -1.9 -1.0 2.9 4.0
+todo draw quad
+probe (0, 0) rgba (-1.0, -1.0, 2.0, 4.0)
+
+% As above, but declare "x" as float4 and cast it to int4.
+
+[pixel shader todo fail(sm>=6)]
+
+uniform float4 f;
+
+void func(out float4 o)
+{
+    o = f;
+}
+
+float4 main() : sv_target
+{
+    float4 x;
+    func((int4)x);
+    return x;
+}
+
+[test]
+uniform 0 float4 -1.9 -1.0 2.9 4.0
+todo draw quad
+probe (0, 0) rgba (-1.0, -1.0, 2.0, 4.0)
+
+
+[pixel shader todo]
+uniform int4 i;
+
+void func(inout float4 a)
+{
+    a += 0.1;
+}
+
+float4 main() : sv_target
+{
+    int4 x = i;
+    func(x);
+    return x;
+}
+
+[test]
+if(sm<4)  uniform 0 float4 -2 0 1 -3000000
+if(sm>=4) uniform 0 int4 -2 0 1 -3000000
+todo(sm<6) draw quad
+probe (0, 0) rgba (-1.0, 0.0, 1.0, -3000000.0) 4

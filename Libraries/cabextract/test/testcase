@@ -1,0 +1,21 @@
+cabextract="/Volumes/app/research-windows-based/dawet/Libraries/cabextract/cabextract"
+cd "/Volumes/app/research-windows-based/dawet/Libraries/cabextract/test"
+
+status=`mktemp`
+expected=$status.expected
+actual=$status.actual
+echo success >$status
+
+trap cleanup 0 1 2
+cleanup() {
+    rm -f $expected $actual $failed
+}
+
+compare_with() {
+    cat >$expected
+    if diff -u $expected $actual; then
+        :
+    else
+        echo failed >$status
+    fi
+}

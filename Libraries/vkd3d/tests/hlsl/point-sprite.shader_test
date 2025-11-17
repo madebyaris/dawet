@@ -1,0 +1,48 @@
+[require]
+point-size
+% For tex2D() with newer shader models.
+options: backcompat
+shader model < 6.0
+
+[sampler 0]
+filter linear linear linear
+address clamp clamp clamp
+
+[srv 0]
+size (2d, 2, 2)
+1 1 0 1     0 1 1 1
+1 0 0 1     1 0 1 1
+
+[vertex shader]
+float4 main(out float2 t : texcoord) : sv_position
+{
+    t = float2(1, 1);
+    return float4(0, 0, 0, 1);
+}
+
+[pixel shader]
+sampler2D s;
+
+float4 main(float2 t : texcoord) : sv_target
+{
+    return tex2D(s, t);
+}
+
+[test]
+clear rtv 0  0 0 0 0
+point-size 30.0 1.0 64.0
+point-sprite off
+draw point list 1
+probe (310, 230) rgba (1, 0, 1, 1)
+probe (330, 230) rgba (1, 0, 1, 1)
+probe (310, 250) rgba (1, 0, 1, 1)
+probe (330, 250) rgba (1, 0, 1, 1)
+
+clear rtv 0  0 0 0 0
+point-size 30.0 1.0 64.0
+point-sprite on
+draw point list 1
+probe (310, 230) rgba (1, 1, 0, 1)
+probe (330, 230) rgba (0, 1, 1, 1)
+probe (310, 250) rgba (1, 0, 0, 1)
+probe (330, 250) rgba (1, 0, 1, 1)

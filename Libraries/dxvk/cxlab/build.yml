@@ -1,0 +1,40 @@
+# CI script to build the CrossOver DXVK add-on
+
+.ccache:
+  stage: build
+  variables:
+    BASEDIR: $CI_PROJECT_DIR
+    CCACHE_BASEDIR: $CI_PROJECT_DIR
+    CCACHE_DIR: "$CI_PROJECT_DIR/ccache"
+  cache:
+    - paths:
+        - ccache/
+
+build:
+  extends: .ccache
+  image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/dxvk:debian-bullseye
+  interruptible: true
+  variables:
+    PKG: dxvk-${CI_COMMIT_REF_NAME}-g${CI_COMMIT_SHORT_SHA}
+  script:
+    # HACK: GitLab creates ownership issues that cause Git failures
+    - git config --global --add safe.directory $CI_PROJECT_DIR
+    # Save the build information so the release stage can retrieve artifacts
+    - echo BUILD_VERSION=$(git describe --tags | sed -e 's/^cxaddon-//') >cxlab_build.env
+    - echo BUILD_PKG=$PKG >>cxlab_build.env
+    - echo BUILD_JOB_URL=$CI_JOB_URL >>cxlab_build.env
+    - PATH="/usr/lib/ccache:$PATH"
+    - ./package-release.sh ${CI_COMMIT_REF_NAME} build --no-package
+    - mkdir -p build/lib/wine/dxvk build/lib64/wine/dxvk
+    - mv build/dxvk-${CI_COMMIT_REF_NAME}/x32/* build/lib/wine/dxvk
+    - mv build/dxvk-${CI_COMMIT_REF_NAME}/x64/* build/lib64/wine/dxvk
+    - cd build
+    - tar cf - lib | xz -9 >../${PKG}_x86.tar.xz
+    - tar cf - lib64 | xz -9 >../${PKG}_x86_64.tar.xz
+  artifacts:
+    name: $PKG
+    paths:
+    - ${PKG}_x86.tar.xz
+    - ${PKG}_x86_64.tar.xz
+    reports:
+      dotenv: cxlab_build.env

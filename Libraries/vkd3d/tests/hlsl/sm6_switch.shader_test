@@ -1,0 +1,65 @@
+[require]
+shader model >= 4.0
+
+[pixel shader]
+uniform float4 u;
+float4 main() : sv_target
+{
+    float4 result;
+
+    switch (u.x)
+    {
+        case 0:
+            result.x = -10.5;
+            result.y = u.w * 1.5;
+            break;
+        case 1:
+            result.x = 11.5;
+            result.y = u.w * -1.5;
+            break;
+        default:
+            result.x = 12.5;
+            result.y = u.w * 2.5;
+            break;
+    }
+    switch (u.y)
+    {
+        case 1:
+            result.z = u.w * u.w * 0.25;
+            break;
+        case 2:
+        case 3:
+            result.z = u.x * 0.25;
+            break;
+        default:
+            result.z = -13.25;
+            break;
+    }
+    switch (u.z)
+    {
+        case 0:
+        case 3:
+        case 4:
+        case 14:
+        case 23:
+        case 31:
+        case 32:
+        case 111:
+            result.w = 14.125;
+            break;
+        case 2:
+        case 9:
+            result.w = 15.25;
+            break;
+        default:
+            result.w = 16.75;
+            break;
+    }
+
+    return result;
+}
+
+[test]
+uniform 0 float4 1.0 1.0 31 11.0
+draw quad
+probe (0, 0) rgba (11.5, -16.5, 30.25, 14.125)

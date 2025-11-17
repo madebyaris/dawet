@@ -1,0 +1,2 @@
+-
+0dc07f5cce72cce47b1a2787a910aeb5edc2a65e vkd3d-shader: Silence a spurious -Wmaybe-uninitialized in vsir_program_insert_alpha_test().

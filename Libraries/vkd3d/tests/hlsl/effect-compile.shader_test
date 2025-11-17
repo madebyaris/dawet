@@ -1,0 +1,286 @@
+% Test special "compile" keyword syntax to compile pixel and vertex shaders
+[pixel shader]
+float4 fun() : sv_target
+{
+    return 0;
+}
+
+sampler sam
+{
+    cat = compile ps_2_0 fun();
+};
+
+float4 main() : sv_target { return 0; }
+
+
+[pixel shader]
+float4 fun() : sv_target
+{
+    return 0;
+}
+
+technique
+{
+    pass
+    {
+        cat = compile ps_2_0 fun();
+    }
+}
+
+float4 main() : sv_target { return 0; }
+
+
+% Only uniform arguments are expected, even if undefined identifiers are used.
+[pixel shader]
+float4 fun(uniform float4 a, float4 b, uniform float4 c) : sv_target
+{
+    return a + b + c;
+}
+
+technique
+{
+    pass
+    {
+        cat = compile ps_2_0 fun(foobar, foobar); // Notice 2 arguments, not 3
+    }
+}
+
+float4 main() : sv_target { return 0; }
+
+
+[pixel shader fail(sm<6)]
+float4 fun(uniform float4 a, float4 b, uniform float4 c) : sv_target
+{
+    return a + b + c;
+}
+
+technique
+{
+    pass
+    {
+        // passing 3 arguments here is not valid because the function has only 2 uniforms.
+        cat = compile ps_2_0 fun(1, 2, 3);
+    }
+}
+
+float4 main() : sv_target { return 0; }
+
+
+[pixel shader fail(sm<6)]
+float4 fun() : sv_target { return 0; }
+
+float4 main() : sv_target
+{
+    PixelShader ps1 = compile ps_2_0 fun(); // Object literals not allowed inside functions.
+
+    return 0;
+}
+
+
+% Test the CompileShader() syntax.
+[pixel shader fail(sm>=6)]
+float arg1, arg2;
+
+float4 main_vertex(uniform float a) : sv_position { return a; }
+
+float4 main(uniform float a) : sv_target { return a; }
+                       // ^ dxc expects a semantic here.
+
+PixelShader ps1 = CompileShader(ps_2_0, main(arg2));
+VertexShader vs1 = CompileShader(vs_2_0, main_vertex(arg1));
+
+technique10 tech1
+{
+    pass pass1
+    {
+        SetVertexShader(vs1);
+        SetPixelShader(ps1);
+    }
+}
+
+
+% Undefined identifiers are not allowed if CompileShader() is used outside a state block.
+[pixel shader fail]
+float4 main(uniform float a) : sv_target { return a; }
+
+PixelShader ps1 = CompileShader(ps_2_0, main(foobar));
+
+
+% But undefined identifiers are allowed if inside a state block.
+[pixel shader fail(sm>=6)]
+float4 main_vertex(uniform float a) : sv_position { return a; }
+
+float4 main(uniform float a) : sv_target { return a; }
+                       // ^ dxc expects a semantic here.
+
+technique tech1
+{
+    pass pass1
+    {
+        SetVertexShader(CompileShader(vs_2_0, main_vertex(foo)));
+        SetPixelShader(CompileShader(ps_2_0, main(bar)));
+    }
+}
+
+
+% Again only uniform parameters are expected
+[pixel shader fail]
+float aa, bb;
+
+float4 main(uniform float a, float b) : sv_target { return a; }
+
+PixelShader ps1 = CompileShader(ps_2_0, main(aa, bb));
+
+
+% Only a set of target profiles are allowed
+[pixel shader fail(sm<6)]
+float4 main() : sv_target { return 0; }
+
+PixelShader ps1 = CompileShader(ps_6_0, main());
+
+[pixel shader fail(sm<6)]
+float4 main() : sv_target { return 0; }
+
+PixelShader ps1 = CompileShader(fs_2_0, main());
+
+
+% Shaders cannot be passed around to another variable: "Initializer must be literal expressions.".
+[pixel shader fail(sm<6) todo]
+float4 main() : sv_target { return 0; }
+
+PixelShader ps1 = CompileShader(ps_2_0, main());
+PixelShader ps2 = ps1;
+
+
+[pixel shader fail(sm<6)]
+float4 main() : sv_target { return 0; }
+PixelShader ps1 = 42;
+
+[pixel shader todo]
+float4 main() : sv_target { return 0; }
+PixelShader ps1 = {42}; // braces make the type checking more permissive.
+
+% This compiles, but the default value of "f" is not written.
+[pixel shader fail(sm>=6)]
+float4 fun() : sv_target { return 0; }
+float f = {CompileShader(ps_2_0, fun())};
+float4 main() : sv_target { return f; }
+
+% This also compiles, but the default value of "f" is not written.
+[pixel shader fail(sm>=6)]
+float4 fun() : sv_target { return 0; }
+float4 f = {1, 2, compile ps_2_0 fun(), 4};
+float4 main() : sv_target { return f; }
+
+
+[pixel shader fail(sm<6)]
+float4 fun() : sv_target { return 0; }
+
+float4 main() : sv_target
+{
+    PixelShader ps1 = CompileShader(ps_2_0, fun()); // Object literals not allowed inside functions.
+
+    return 0;
+}
+
+
+% Default values are allowed for uniform variables.
+[pixel shader fail(sm>=6)]
+float4 fun(uniform float4 a, uniform float4 b = {1, 2, 3, 4}) : sv_target
+{
+    return 8*a + b;
+}
+
+technique10 T1
+{
+    pass P1
+    {
+        PixelShader = compile ps_4_0 fun(5);
+    }
+}
+
+float4 main() : sv_target { return 0; }
+
+
+[pixel shader fail(sm>=6)]
+float4 fun(float4 a : COLOR0 = {-1, -2, -3, -4}, uniform float4 b = {1, 2, 3, 4}) : sv_target
+{
+    return 8*a + b;
+}
+
+technique10 T1
+{
+    pass P1
+    {
+        PixelShader = compile ps_4_0 fun();
+    }
+}
+
+float4 main() : sv_target { return 0; }
+
+
+[require]
+shader model >= 5.0
+shader model < 6.0
+
+
+% The following test segfaults on DXC.
+[pixel shader]
+float f;
+
+float4 foo(uniform float r) : sv_target { return r; }
+
+struct apple
+{
+    float4 f;
+    PixelShader ps;
+} a = {1, 2, 3, 4, compile ps_4_0 foo(f * f)};
+
+technique
+{
+    pass
+    {
+        PixelShader = a.ps;
+    }
+}
+
+float4 main() : sv_target { return 0; }
+
+[test]
+draw quad
+probe (0, 0) rgba (0, 0, 0, 0)
+
+
+[require]
+shader model >= 4.0
+shader model < 6.0
+
+
+[effect fail]
+float4 fun(uniform float4 a, float4 b : FOO) : sv_target
+{
+    return 0;
+}
+
+technique10 T0
+{
+    pass P0
+    {
+        PixelShader = compile ps_4_0 fun(4, 5);
+    }
+}
+
+
+[effect todo]
+float4 fun(uniform float4 a, float4 b : FOO) : sv_target
+{
+    return 10 * a + b;
+}
+
+technique10 T0
+{
+    pass P0
+    {
+        PixelShader = compile ps_4_0 fun(4);
+    }
+}

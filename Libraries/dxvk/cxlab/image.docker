@@ -1,0 +1,26 @@
+# FROM line will be added dynamically
+
+WORKDIR /tmp
+
+# Notes:
+# - DXVK needs the default MinGW binaries to use the POSIX threading model
+#   rather than the Windows one. Debian ships both versions so use
+#   update-alternatives to point to the right one.
+# - Recent versions of DXVK need git. We want it to extract a sensible version
+#   for releases too.
+# - Use xz for compression as it is much more efficient than bzip2.
+# - Add curl for the upload to the package registry.
+
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update && \
+    apt-get install -y curl xz-utils ccache \
+            g++-mingw-w64 git glslang-tools libstdc++-10-dev meson && \
+    update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix && \
+    update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix && \
+    update-alternatives --set i686-w64-mingw32-gcc /usr/bin/i686-w64-mingw32-gcc-posix && \
+    update-alternatives --set i686-w64-mingw32-g++ /usr/bin/i686-w64-mingw32-g++-posix && \
+    update-ccache-symlinks && \
+    apt-get clean && \
+    useradd -m gitlab
+
+USER gitlab

@@ -1,0 +1,18 @@
+[require]
+shader model >= 4.0
+
+[pixel shader]
+uniform float4 u;
+
+float4 main() : sv_target
+{
+    float result[4] = {0, 0, 0, 0};
+    result[u.x] = u.y;
+    result[u.z] = u.w;
+    return float4(result[0], result[1], result[2], result[3]);
+}
+
+[test]
+uniform 0 float4 1.0 3.5 2.0 2.25
+draw quad
+probe (0, 0) rgba (0.0, 3.5, 2.25, 0.0)

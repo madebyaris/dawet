@@ -1,0 +1,8 @@
+MODULE    = pstorec.dll
+IMPORTS   = uuid ole32 shlwapi advapi32
+
+EXTRADLLFLAGS = -Wb,--prefer-native
+
+SOURCES = \
+	pstorec.c \
+	pstorec_tlb.idl

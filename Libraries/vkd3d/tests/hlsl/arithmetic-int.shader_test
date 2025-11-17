@@ -1,0 +1,138 @@
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    int x = 5;
+    int y = 15;
+
+    return float4(x + y, x - y, x * y, x / y);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (20.0, -10.0, 75.0, 0.0)
+
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    int x = 5;
+    int y = 15;
+
+    return float4(x % y, +x, -x, y / x);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (5.0, 5.0, -5.0, 3.0)
+
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    int x = 42;
+    int y = 5;
+
+    return float4(x / y, -x / y, x / -y, -x / -y);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (8.0, -8.0, -8.0, 8.0)
+
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    int x = 42;
+    int y = 5;
+
+    return float4(x % y, -x % y, x % -y, -x % -y);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (2.0, -2.0, 2.0, -2.0)
+
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    int x = 45;
+    int y = 5;
+
+    return float4(x / y, -x / y, x / -y, -x / -y);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (9.0, -9.0, -9.0, 9.0)
+
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    int x = 45;
+    int y = 5;
+
+    return float4(x % y, -x % y, x % -y, -x % -y);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (0.0, 0.0, 0.0, 0.0)
+
+[pixel shader fail(sm<6)]
+// On SM1 this gives hr 0x88760b59.
+float4 main() : SV_TARGET
+{
+    int x = 1;
+    int y = 0;
+
+    return x / y;
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (0.0, 0.0, 0.0, 0.0)
+
+[pixel shader fail(sm<6)]
+// On SM1 this gives hr 0x88760b59.
+float4 main() : SV_TARGET
+{
+    int x = 1;
+    int y = 0;
+
+    return x % y;
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (0.0, 0.0, 0.0, 0.0)
+
+
+[require]
+shader model >= 4.0
+
+[pixel shader]
+float4 main() : SV_TARGET
+{
+    int x = -2147483648;
+    int y = -1;
+
+    return x / y;
+}
+
+[test]
+draw quad
+if(sm<6)  probe (0,0) rgba (-2147483648.0, -2147483648.0, -2147483648.0, -2147483648.0)
+if(sm>=6) probe (0,0) rgba (0.0, 0.0, 0.0, 0.0)
+
+
+[pixel shader]
+float4 main() : sv_target
+{
+    int2 x = {5, 15};
+    int2 y = {2, 5};
+    int2 z = {3, 8};
+
+    return float4(x / y, z % y);
+}
+
+[test]
+draw quad
+probe (0, 0) rgba (2.0, 3.0, 1.0, 3.0)

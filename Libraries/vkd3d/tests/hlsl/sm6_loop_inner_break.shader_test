@@ -1,0 +1,54 @@
+[require]
+shader model >= 4.0
+
+[pixel shader]
+uniform float4 u;
+
+float4 main() : sv_target
+{
+    float tmp = 0.0f;
+    for (int i = 0; i < u.x; ++i)
+    {
+        if (i == u.y)
+            tmp += 1.0f;
+        for (int j = 0; j < u.z; ++j)
+        {
+            if (j == u.w)
+            {
+                tmp += 10.0f;
+                break;
+            }
+        }
+    }
+
+    return float4(tmp, 0, 0, 0);
+}
+
+[test]
+uniform 0 float4 0.0 0.0 0.0 0.0
+draw quad
+probe (0, 0) rgba (0.0, 0.0, 0.0, 0.0) 1
+uniform 0 float4 1.0 0.0 0.0 0.0
+draw quad
+probe (0, 0) rgba (1.0, 0.0, 0.0, 0.0) 1
+uniform 0 float4 1.0 1.0 0.0 0.0
+draw quad
+probe (0, 0) rgba (0.0, 0.0, 0.0, 0.0) 1
+uniform 0 float4 1.0 2.0 1.0 0.0
+draw quad
+probe (0, 0) rgba (10.0, 0.0, 0.0, 0.0) 1
+uniform 0 float4 7.0 0.0 0.0 0.0
+draw quad
+probe (0, 0) rgba (1.0, 0.0, 0.0, 0.0) 1
+uniform 0 float4 7.0 2.0 0.0 0.0
+draw quad
+probe (0, 0) rgba (1.0, 0.0, 0.0, 0.0) 1
+uniform 0 float4 7.0 6.0 2.0 1.0
+draw quad
+probe (0, 0) rgba (71.0, 0.0, 0.0, 0.0) 1
+uniform 0 float4 7.0 7.0 0.0 0.0
+draw quad
+probe (0, 0) rgba (0.0, 0.0, 0.0, 0.0) 1
+uniform 0 float4 7.0 1.0 1.0 2.0
+draw quad
+probe (0, 0) rgba (1.0, 0.0, 0.0, 0.0) 1

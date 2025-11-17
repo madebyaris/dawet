@@ -1,0 +1,49 @@
+# CI script to create the CrossOver DXVK add-on releases
+#
+# To create a release push a tag of the form cxaddon-X.Y.Z-N where:
+# - X.Y.Z is the DXVK version that this release is based on.
+# - N is a monotonically increasing integer for each release based on that
+#   version.
+
+.check-rules:
+  rules:
+    - if: $CI_COMMIT_TAG =~ /^cxaddon-/
+  needs:
+    - job: build
+      artifacts: true # retrieve the cxlab_build.env variables
+  variables:
+    PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/cxaddon/${BUILD_VERSION}"
+    PKG: "dxvk-${BUILD_VERSION}"
+
+upload:
+  extends: .check-rules
+  stage: upload
+  tags:
+    - book-keeping
+  image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/dxvk:debian-bullseye
+  script:
+    - >
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --upload-file "${BUILD_PKG}_x86.tar.xz" \
+        "${PACKAGE_REGISTRY_URL}/${PKG}_x86.tar.xz"
+    - >
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --upload-file "${BUILD_PKG}_x86_64.tar.xz" \
+        "${PACKAGE_REGISTRY_URL}/${PKG}_x86_64.tar.xz"
+
+create-release:
+  extends: .check-rules
+  stage: release
+  tags:
+    - book-keeping
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  script:
+    # HACK: Somehow the 'release' keyword is incompatible with the podman used
+    # by our runners (3.0.1, should be fixed in 4.3.1), so call release-cli
+    # instead.
+    - release-cli create
+        --name "DXVK $BUILD_VERSION"
+        --description "DXVK ${BUILD_VERSION} CrossOver add-on"
+        --tag-name "$CI_COMMIT_TAG"
+        --assets-link "{\"name\":\"${PKG}_x86.tar.xz\",\"url\":\"${PACKAGE_REGISTRY_URL}/${PKG}_x86.tar.xz\"}"
+        --assets-link "{\"name\":\"${PKG}_x86_64.tar.xz\",\"url\":\"${PACKAGE_REGISTRY_URL}/${PKG}_x86_64.tar.xz\"}"

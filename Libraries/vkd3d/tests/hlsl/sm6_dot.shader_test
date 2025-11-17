@@ -1,0 +1,46 @@
+[require]
+shader model >= 4.0
+
+[pixel shader]
+uniform float4 u0;
+
+void main(out float4 dst : SV_Target)
+{
+    dst.x = dot(u0.xy, u0.zw);
+    dst.yzw = (float3)0;
+}
+
+[test]
+uniform 0 float4 1.0 1.0 1.0 1.0
+draw quad
+probe (0, 0) rgba (2.0, 0.0, 0.0, 0.0)
+
+[pixel shader]
+uniform float3 u0;
+uniform float3 u1;
+
+float4 main() : SV_Target
+{
+    return dot(u0, u1);
+}
+
+[test]
+uniform 0 float4 1.0 2.0 3.0 0.0
+uniform 4 float4 3.0 1.0 2.0 0.0
+draw quad
+probe (0, 0) rgba (11.0, 11.0, 11.0, 11.0)
+
+[pixel shader]
+uniform float4 u0;
+uniform float4 u1;
+
+float4 main() : SV_Target
+{
+    return dot(u0, u1);
+}
+
+[test]
+uniform 0 float4 1.0 2.0 3.0 4.0
+uniform 4 float4 3.0 1.0 2.0 1.5
+draw quad
+probe (0, 0) rgba (17.0, 17.0, 17.0, 17.0)

@@ -1,0 +1,10 @@
+stages:
+  - image
+  - build
+  - upload
+  - release
+
+include:
+  - local: "cxlab/image.yml"
+  - local: "cxlab/build.yml"
+  - local: "cxlab/release.yml" # see release documentation there

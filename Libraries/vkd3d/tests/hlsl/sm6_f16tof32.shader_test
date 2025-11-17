@@ -1,0 +1,14 @@
+[pixel shader todo(sm<4)]
+uniform uint4 u;
+
+float4 main() : sv_target
+{
+    uint4 hf = u;
+    hf.x = f32tof16(0.000061035156f);
+    return f16tof32(hf);
+}
+
+[test]
+uniform 0 uint4 0 15360 22080 23504
+todo(sm<4) draw quad
+probe (0, 0) rgba (0.000061035156, 1.0, 100.0, 250.0)

@@ -1,0 +1,96 @@
+# FROM line will be added dynamically
+
+WORKDIR /tmp
+
+# Package spirv-tools from Debian has two problems for us: first, it
+# doesn't have shared libraries; second, it's not multiarch. So we
+# have to rebuild it with some tweaks. In order to make it multiarch
+# we also have to drop the executables, but we don't care about those
+# anyway.
+
+# Mesa requires Meson >= 1.1.0, which is not available on Debian bookworm.
+# Fortunately that can be worked around by removing some features from
+# meson.build, which are not needed for llvmpipe. Notice that we use
+# "git show | patch -R" instead of "git revert" so we don't have to configure
+# a valid email and user name for git.
+
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    echo 'path-exclude=/usr/share/doc/*' > /etc/dpkg/dpkg.cfg.d/99-exclude-cruft && \
+    echo 'path-exclude=/usr/share/locale/*' >> /etc/dpkg/dpkg.cfg.d/99-exclude-cruft && \
+    echo 'path-exclude=/usr/share/man/*' >> /etc/dpkg/dpkg.cfg.d/99-exclude-cruft && \
+    echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf && \
+    echo '#!/bin/sh' > /usr/sbin/policy-rc.d && \
+    echo 'exit 101' >> /usr/sbin/policy-rc.d && \
+    chmod +x /usr/sbin/policy-rc.d && \
+    dpkg --add-architecture i386 && \
+    sed -i -e 's|Types: deb|Types: deb deb-src|g' /etc/apt/sources.list.d/* && \
+    apt-get update && \
+    apt-get dist-upgrade -y && \
+    apt-get install -y build-essential pkg-config gcc-mingw-w64 crossbuild-essential-i386 \
+                       autoconf automake libtool flex bison curl \
+                       git ca-certificates rsync \
+                       llvm-15-dev meson ninja-build python3-mako \
+                       zlib1g-dev libexpat-dev libdrm-dev libglvnd-dev \
+                       doxygen doxygen-latex graphviz \
+                       mesa-vulkan-drivers mesa-vulkan-drivers:i386 \
+                       vulkan-tools spirv-headers \
+                       libegl-dev libegl-dev:i386 \
+                       libvulkan-dev libvulkan-dev:i386 \
+                       libncurses-dev libncurses-dev:i386 \
+                       libopengl-dev libopengl-dev:i386 \
+                       libxcb1-dev libxcb1-dev:i386 \
+                       libxcb-util-dev libxcb-util-dev:i386 \
+                       libxcb-icccm4-dev libxcb-icccm4-dev:i386 \
+                       libxcb-keysyms1-dev libxcb-keysyms1-dev:i386 && \
+    apt-get build-dep -y spirv-tools && \
+    apt-get build-dep -y -ai386 spirv-tools && \
+
+    git clone --depth 1 --branch wine-3.21 https://gitlab.winehq.org/wine/wine.git && \
+    cd wine && \
+    mkdir build && \
+    cd build && \
+    ../configure --enable-win64 --without-x --without-freetype && \
+    make tools/widl/widl && \
+    cp tools/widl/widl /usr/local/bin && \
+    cd ../.. && \
+    rm -rf wine && \
+
+    apt-get source spirv-tools && \
+    cd spirv-tools-* && \
+    sed -i -e 's|-DBUILD_SHARED_LIBS=OFF|-DBUILD_SHARED_LIBS=ON|g' debian/rules && \
+    sed -i -e 's|dh_install$|dh_install \&\& rm debian/spirv-tools/usr/bin/*|g' debian/rules && \
+    sed -i '/Architecture: any/a Multi-Arch: same' debian/control && \
+    dpkg-buildpackage -uc -us && \
+    cd .. && \
+    rm -f spirv-tools-dbgsym_*.deb && \
+    dpkg -i spirv-tools_*.deb && \
+    rm -fr * && \
+
+    apt-get source spirv-tools && \
+    cd spirv-tools-* && \
+    sed -i -e 's|-DBUILD_SHARED_LIBS=OFF|-DBUILD_SHARED_LIBS=ON|g' debian/rules && \
+    sed -i -e 's|dh_install$|dh_install \&\& rm debian/spirv-tools/usr/bin/*|g' debian/rules && \
+    sed -i '/Architecture: any/a Multi-Arch: same' debian/control && \
+    CONFIG_SITE=/etc/dpkg-cross/cross-config.amd64 DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -ai386 -Pcross,nocheck -uc -us && \
+    cd .. && \
+    rm -f spirv-tools-dbgsym_*.deb && \
+    dpkg -i spirv-tools_*.deb && \
+    rm -fr * && \
+
+    git clone --branch mesa-24.2.4 https://gitlab.freedesktop.org/mesa/mesa.git && \
+    cd mesa && \
+    git show 876db9135048 | patch -p1 -R && \
+    sed -i -e '981,991d' meson.build && \
+    mkdir build && \
+    cd build && \
+    meson setup --buildtype release -Dprefix=/opt/mesa24 -Dplatforms= -Dvideo-codecs= -Dvulkan-drivers=swrast -Dgallium-drivers=swrast -Dopengl=true -Degl=enabled -Dglvnd=true -Dshared-glapi=enabled -Dglx=disabled -Dgles1=disabled -Dgles2=disabled .. && \
+    meson install && \
+    cd ../.. && \
+    rm -fr mesa && \
+
+    apt-get clean && \
+    curl -L -s https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.8.2407/linux_dxc_2024_07_31.x86_64.tar.gz | tar zx -C /usr/local ./lib/libdxcompiler.so ./lib/libdxil.so && \
+    groupadd host-render -g 800 && \
+    useradd -m gitlab -G host-render
+
+USER gitlab

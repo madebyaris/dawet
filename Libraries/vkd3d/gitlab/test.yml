@@ -1,0 +1,49 @@
+.test-win:
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  interruptible: true
+  needs:
+    - job: build-crosstest
+  tags:
+    - win10-21h2
+  script:
+    - git rebase $CI_MERGE_REQUEST_DIFF_BASE_SHA --exec './artifacts/driver.cross64.exe $(git cherry $CI_MERGE_REQUEST_DIFF_BASE_SHA HEAD^ | wc -l) $(git rev-parse --short HEAD)'
+    - if (Test-Path "pipeline_failed") { exit 1 }
+  artifacts:
+    when: always
+    paths:
+      - artifacts
+
+test-win-64:
+  extends: .test-win
+  variables:
+    TEST_ARCH: "64"
+    VKD3D_TEST_SKIP_DXC: "1"
+
+test-win-32:
+  extends: .test-win
+  variables:
+    TEST_ARCH: "32"
+    VKD3D_TEST_SKIP_DXC: "1"
+
+test-win-64-dxc:
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+  interruptible: true
+  allow_failure: true
+  needs:
+    - job: build-crosstest
+  tags:
+    - win10-21h2
+  script:
+    - 'Invoke-WebRequest -Uri "https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.8.2407/dxc_2024_07_31.zip" -OutFile ".\dxc.zip"'
+    - 'Expand-Archive -Path "dxc.zip" -DestinationPath ".\dxc"'
+    - '$Env:PATH += ";" + (Convert-Path ".\dxc\bin\x64")'
+    - git rebase $CI_MERGE_REQUEST_DIFF_BASE_SHA --exec './artifacts/driver.cross64.exe $(git cherry $CI_MERGE_REQUEST_DIFF_BASE_SHA HEAD^ | wc -l) $(git rev-parse --short HEAD)'
+    - if (Test-Path "pipeline_failed") { exit 1 }
+  artifacts:
+    when: always
+    paths:
+      - artifacts
