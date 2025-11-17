@@ -1,6 +1,6 @@
 <div align="center">
 
-  # Whisky 🥃 
+  # Dawet 🥃 
   *Wine but a bit stronger*
   
   ![](https://img.shields.io/github/actions/workflow/status/IsaacMarovitz/Whisky/SwiftLint.yml?style=for-the-badge)
@@ -9,7 +9,7 @@
 
 ## Maintenance Notice
 
-[Whisky is no longer actively maintained](https://docs.getwhisky.app/maintenance-notice). Apps and games may break at any time.
+[Dawet is no longer actively maintained](https://docs.getwhisky.app/maintenance-notice). Apps and games may break at any time.
 
 <img width="650" alt="Config" src="https://github.com/Whisky-App/Whisky/assets/42140194/d0a405e8-76ee-48f0-92b5-165d184a576b">
 
@@ -27,7 +27,7 @@ Debug and profile with ease
 
 ---
 
-Whisky provides a clean and easy to use graphical wrapper for Wine built in native SwiftUI. You can make and manage bottles, install and run Windows apps and games, and unlock the full potential of your Mac with no technical knowledge required. Whisky is built on top of CrossOver 22.1.1, and Apple's own `Game Porting Toolkit`.
+Dawet provides a clean and easy to use graphical wrapper for Wine built in native SwiftUI. You can make and manage bottles, install and run Windows apps and games, and unlock the full potential of your Mac with no technical knowledge required. Dawet is built on top of CrossOver 22.1.1, and Apple's own `Game Porting Toolkit`.
 
 Translated on [Crowdin](https://crowdin.com/project/whisky).
 
@@ -39,8 +39,8 @@ Translated on [Crowdin](https://crowdin.com/project/whisky).
 
 ## Homebrew
 
-Whisky is on homebrew! Install with 
-`brew install --cask whisky`.
+Dawet is on homebrew! Install with 
+`brew install --cask dawet`.
 
 ## My game isn't working!
 
@@ -50,7 +50,7 @@ Some games need special steps to get working. Check out the [wiki](https://githu
 
 ## Credits & Acknowledgments
 
-Whisky is possible thanks to the magic of several projects:
+Dawet is possible thanks to the magic of several projects:
 
 - [msync](https://github.com/marzent/wine-msync) by marzent
 - [DXVK-macOS](https://github.com/Gcenx/DXVK-macOS) by Gcenx and doitsujin
@@ -75,7 +75,7 @@ Special thanks to Gcenx, ohaiibuzzle, and Nat Brown for their support and contri
         </picture>
     </td>
     <td>
-        Whisky doesn't exist without CrossOver. Support the work of CodeWeavers using our <a href="https://www.codeweavers.com/store?ad=1010">affiliate link</a>.
+        Dawet doesn't exist without CrossOver. Support the work of CodeWeavers using our <a href="https://www.codeweavers.com/store?ad=1010">affiliate link</a>.
     </td>
   </tr>
 </table>
